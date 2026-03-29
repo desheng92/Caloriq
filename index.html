@@ -472,6 +472,9 @@ window.handleAuthSubmit = async function() {
   try {
     if (window._authMode === 'signup') await window._db.signUp(email, password);
     else await window._db.signIn(email, password);
+    // Success — onAuthStateChange will hide the overlay
+    // Re-enable button as fallback in case overlay doesn't hide
+    setTimeout(() => { btn.disabled = false; btn.textContent = window._authMode === 'signin' ? 'Sign in' : 'Create account'; }, 3000);
   } catch (e) {
     errEl.textContent = e.message || 'Authentication failed.';
     errEl.style.display = 'block';
@@ -517,16 +520,23 @@ document.getElementById('dateChip').textContent =
 // ============================================================
 onAuthStateChange(async (event, session) => {
   if (session?.user) {
-    currentProfile = await getProfile().catch(() => null);
+    // Hide overlay immediately before any async calls that could fail
     document.getElementById('authOverlay').style.display = 'none';
     document.getElementById('appShell').style.display = 'block';
-    if (currentProfile) {
-      document.getElementById('userChip').textContent =
-        (currentProfile.display_name || currentProfile.email || 'Account') + ' · Sign out';
-      if (currentProfile.daily_budget)
-        document.getElementById('dailyBudget').value = currentProfile.daily_budget;
+    try {
+      currentProfile = await getProfile().catch(() => null);
+      if (currentProfile) {
+        document.getElementById('userChip').textContent =
+          (currentProfile.display_name || currentProfile.email || session.user.email || 'Account') + ' · Sign out';
+        if (currentProfile.daily_budget)
+          document.getElementById('dailyBudget').value = currentProfile.daily_budget;
+      } else {
+        document.getElementById('userChip').textContent = (session.user.email || 'Account') + ' · Sign out';
+      }
+      await renderLog();
+    } catch (e) {
+      console.error('Post-login setup error:', e);
     }
-    await renderLog();
   } else {
     document.getElementById('authOverlay').style.display = 'flex';
     document.getElementById('appShell').style.display = 'none';
