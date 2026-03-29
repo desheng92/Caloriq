@@ -1,0 +1,72 @@
+<div class="budget-grid">
+  <div class="budget-card">
+    <h3>Daily budget</h3>
+    <div class="form-group" style="margin-bottom:1rem;">
+      <label>Daily calorie target (kcal)</label>
+      <input type="number" placeholder="e.g. 2000" min="500" max="5000"
+        [(ngModel)]="dailyBudget" (change)="saveBudget()" />
+    </div>
+    <div>
+      <div class="budget-row">
+        <span class="label">Consumed today</span>
+        <span class="val">{{ todayTotal | number }} kcal</span>
+      </div>
+      <div class="budget-row">
+        <span class="label">Budget</span>
+        <span class="val">{{ bpBudgetLabel }}</span>
+      </div>
+      <div class="budget-row">
+        <span class="label">Remaining</span>
+        <span class="val" [style.color]="budgetRemainingColor">{{ budgetRemaining }}</span>
+      </div>
+      <div class="progress-bar" style="margin-top:12px;">
+        <div class="progress-fill" [class]="barColorClass" [style.width]="pct + '%'"></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">{{ pctLabel }}</div>
+    </div>
+  </div>
+
+  <div class="budget-card">
+    <h3>Weekly overview</h3>
+    <div *ngIf="weeklyRows.length === 0" style="color:var(--muted);font-size:13px;">No data yet.</div>
+    <div class="plan-row" *ngFor="let row of weeklyRows">
+      <div class="plan-day">{{ row.label }}</div>
+      <div class="plan-bar-wrap">
+        <div class="plan-bar-label">
+          <span>{{ row.total | number }} kcal</span>
+          <span *ngIf="row.budget">{{ row.pct }}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [class]="row.colorClass" [style.width]="row.pct + '%'"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="budget-card" style="margin-bottom:1rem;">
+  <h3>Plan ahead with AI</h3>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">
+    Tell the AI your budget and preferences, and get a suggested day or week plan.
+  </p>
+  <div class="form-row" style="margin-bottom:0.75rem;flex-wrap:wrap;">
+    <div class="form-group" style="min-width:130px;">
+      <label>Calorie budget</label>
+      <input type="number" placeholder="e.g. 1800" [(ngModel)]="planBudget" />
+    </div>
+    <div class="form-group" style="flex:2;min-width:160px;">
+      <label>Preferences / restrictions</label>
+      <input type="text" placeholder="e.g. vegetarian, no gluten, high protein" [(ngModel)]="planPrefs" />
+    </div>
+    <div class="form-group" style="flex:0;min-width:auto;display:flex;align-items:flex-end;gap:8px;">
+      <button class="btn btn-primary" (click)="generateDayPlan()" [disabled]="planLoading">Day plan</button>
+      <button class="btn btn-ghost" (click)="generateWeekPlan()" [disabled]="planLoading">Week plan</button>
+    </div>
+  </div>
+  <div class="ai-response" [class.loading]="planLoading">
+    <ng-container *ngIf="planLoading">
+      Thinking<span class="typing-dot">.</span><span class="typing-dot">.</span><span class="typing-dot">.</span>
+    </ng-container>
+    <ng-container *ngIf="!planLoading">{{ planResponse }}</ng-container>
+  </div>
+</div>

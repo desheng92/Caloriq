@@ -1,0 +1,58 @@
+<div class="ai-panel">
+  <div class="ai-header">
+    <div class="ai-icon">✦</div>
+    <div>
+      <div class="ai-title">Smarter eating suggestions</div>
+      <div class="ai-sub">Select foods from your log to get AI-powered lower-calorie alternatives</div>
+    </div>
+  </div>
+  <div class="ai-body">
+    <div class="food-select-grid">
+      <div *ngIf="foods.length === 0" style="color:var(--muted);font-size:13px;">Log some foods first, then come back here.</div>
+      <div
+        *ngFor="let f of foods"
+        class="food-chip"
+        [class.selected]="selectedFoods.has(f)"
+        (click)="toggleFood(f)"
+      >{{ f }}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap;">
+      <button class="btn btn-primary" (click)="getSuggestions()" [disabled]="suggestionLoading">Get suggestions</button>
+      <button class="btn btn-ghost" (click)="getWeeklyTip()" [disabled]="suggestionLoading">Weekly nutrition tip</button>
+    </div>
+    <div class="ai-response" [class.loading]="suggestionLoading">
+      <ng-container *ngIf="suggestionLoading">
+        Thinking<span class="typing-dot">.</span><span class="typing-dot">.</span><span class="typing-dot">.</span>
+      </ng-container>
+      <ng-container *ngIf="!suggestionLoading">{{ suggestionText }}</ng-container>
+    </div>
+  </div>
+</div>
+
+<div class="ai-panel">
+  <div class="ai-header">
+    <div class="ai-icon">✧</div>
+    <div>
+      <div class="ai-title">Ask anything about your diet</div>
+      <div class="ai-sub">Get personalised advice based on what you've eaten</div>
+    </div>
+  </div>
+  <div class="ai-body">
+    <div class="form-row" style="margin-bottom:0.75rem;">
+      <input
+        type="text"
+        [(ngModel)]="question"
+        placeholder="e.g. What should I eat for dinner to stay under budget?"
+        style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;"
+        (keydown.enter)="askQuestion()"
+      />
+      <button class="btn btn-primary" (click)="askQuestion()" [disabled]="chatLoading">Ask</button>
+    </div>
+    <div class="ai-response" [class.loading]="chatLoading">
+      <ng-container *ngIf="chatLoading">
+        Thinking<span class="typing-dot">.</span><span class="typing-dot">.</span><span class="typing-dot">.</span>
+      </ng-container>
+      <ng-container *ngIf="!chatLoading">{{ chatText }}</ng-container>
+    </div>
+  </div>
+</div>

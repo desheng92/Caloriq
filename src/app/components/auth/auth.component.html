@@ -1,0 +1,24 @@
+<div class="auth-box">
+  <div class="auth-logo">Calori<span>q</span></div>
+  <div class="auth-sub">Your smart diet tracker</div>
+
+  <div class="auth-tabs">
+    <button class="auth-tab" [class.active]="mode === 'signin'" (click)="switchMode('signin')">Sign in</button>
+    <button class="auth-tab" [class.active]="mode === 'signup'" (click)="switchMode('signup')">Create account</button>
+  </div>
+
+  <div class="auth-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="auth-field">
+    <label>Email</label>
+    <input type="email" placeholder="you@example.com" [(ngModel)]="email" />
+  </div>
+  <div class="auth-field">
+    <label>Password</label>
+    <input type="password" placeholder="••••••••" [(ngModel)]="password" (keydown.enter)="submit()" />
+  </div>
+
+  <button class="auth-btn" (click)="submit()" [disabled]="loading">
+    {{ loading ? 'Please wait…' : (mode === 'signin' ? 'Sign in' : 'Create account') }}
+  </button>
+</div>

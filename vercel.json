@@ -1,0 +1,6 @@
+{
+  "outputDirectory": "dist/caloriq/browser",
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}

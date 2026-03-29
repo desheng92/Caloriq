@@ -1,0 +1,82 @@
+<div class="summary-bar">
+  <div class="stat-card">
+    <div class="stat-label">Today</div>
+    <div class="stat-val green">{{ todayCal | number }}</div>
+    <div class="stat-sub">kcal consumed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Remaining</div>
+    <div [class]="remainCalClass">{{ remainCal !== null ? (remainCal | number) : '—' }}</div>
+    <div class="stat-sub">of daily budget</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">This Week</div>
+    <div class="stat-val amber">{{ weekCal | number }}</div>
+    <div class="stat-sub">kcal this week</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Avg / Day</div>
+    <div class="stat-val" style="color:var(--muted)">{{ avgCal !== '—' ? (avgCal | number) : '—' }}</div>
+    <div class="stat-sub">7-day average</div>
+  </div>
+</div>
+
+<div class="add-form">
+  <div class="section-title" style="font-size:16px;font-weight:600;margin-bottom:1rem;">Add food entry</div>
+  <div class="form-row">
+    <div class="form-group" style="flex:2;min-width:180px;">
+      <label>Food / Dish</label>
+      <input type="text" placeholder="e.g. Grilled chicken, Latte…" [(ngModel)]="foodName" />
+    </div>
+    <div class="form-group" style="min-width:110px;">
+      <label>Calories</label>
+      <input type="number" placeholder="kcal" min="0" [(ngModel)]="foodCal" />
+    </div>
+    <div class="form-group" style="min-width:130px;">
+      <label>Meal</label>
+      <select [(ngModel)]="foodMeal">
+        <option>Breakfast</option>
+        <option>Lunch</option>
+        <option>Dinner</option>
+        <option>Snack</option>
+      </select>
+    </div>
+    <div class="form-group" style="flex:0;min-width:auto;display:flex;align-items:flex-end;">
+      <button class="btn btn-primary" (click)="addFood()" [disabled]="loading">Add</button>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;margin:-0.5rem 0 1.5rem;">
+  <div style="flex:1;height:1px;background:var(--border);"></div>
+  <button class="btn btn-ghost" style="font-size:13px;display:flex;align-items:center;gap:6px;" (click)="openScan.emit()">
+    <span style="font-size:16px;">📷</span> Scan food with AI
+  </button>
+  <div style="flex:1;height:1px;background:var(--border);"></div>
+</div>
+
+<div class="section-header">
+  <div class="section-title">Today's log</div>
+</div>
+
+<div class="food-list">
+  <div *ngIf="mealGroups.length === 0" style="color:var(--muted);font-size:14px;text-align:center;padding:2rem 0;">
+    No entries yet. Start logging your meals above.
+  </div>
+
+  <div class="meal-group" *ngFor="let group of mealGroups">
+    <div class="meal-label">
+      {{ group.meal }} · <span style="color:var(--accent)">{{ group.subtotal | number }} kcal</span>
+    </div>
+    <div class="food-item" *ngFor="let item of group.items">
+      <div class="food-left">
+        <div class="food-name">{{ item['name'] }}</div>
+        <div class="food-meta" *ngIf="item['portion']">{{ item['portion'] }}</div>
+      </div>
+      <div class="food-right">
+        <div class="food-cal">{{ item['calories'] }}<span> kcal</span></div>
+        <button class="btn btn-danger btn-sm" (click)="deleteFood(item['id'] + '')">✕</button>
+      </div>
+    </div>
+  </div>
+</div>

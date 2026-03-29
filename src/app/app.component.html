@@ -1,0 +1,30 @@
+<!-- Auth overlay - shown when no session -->
+<div id="authOverlay" *ngIf="!session">
+  <app-auth></app-auth>
+</div>
+
+<!-- App shell - shown when authenticated -->
+<div id="appShell" *ngIf="session">
+  <header>
+    <div class="logo">Calori<span>q</span></div>
+    <nav>
+      <button [class.active]="activeTab === 'log'" (click)="setTab('log')">Log</button>
+      <button [class.active]="activeTab === 'ai'" (click)="setTab('ai')">AI Suggest</button>
+      <button [class.active]="activeTab === 'budget'" (click)="setTab('budget')">Budget</button>
+      <button [class.active]="activeTab === 'history'" (click)="setTab('history')">History</button>
+    </nav>
+    <div class="header-right">
+      <div class="date-chip">{{ dateLabel }}</div>
+      <button class="user-chip" (click)="signOut()">{{ session?.user?.email }} · Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <app-log-tab *ngIf="activeTab === 'log'" (openScan)="scanModalOpen = true"></app-log-tab>
+    <app-ai-tab *ngIf="activeTab === 'ai'"></app-ai-tab>
+    <app-budget-tab *ngIf="activeTab === 'budget'"></app-budget-tab>
+    <app-history-tab *ngIf="activeTab === 'history'"></app-history-tab>
+  </main>
+
+  <app-scan-modal *ngIf="scanModalOpen" (close)="scanModalOpen = false"></app-scan-modal>
+</div>
