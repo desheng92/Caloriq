@@ -186,8 +186,8 @@ main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
     <div class="auth-sub">Your smart diet tracker</div>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('signin')">Sign in</button>
-      <button class="auth-tab" onclick="switchAuthTab('signup')">Create account</button>
+      <button class="auth-tab active" onclick="switchAuthTab(event, 'signin')">Sign in</button>
+      <button class="auth-tab" onclick="switchAuthTab(event, 'signup')">Create account</button>
     </div>
 
     <div id="authError" class="auth-error"></div>
@@ -447,6 +447,41 @@ main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
 </div>
 
 <!-- ============================================================
+     AUTH UI — plain script so buttons work even if module is still loading
+============================================================ -->
+<script>
+window._authMode = 'signin';
+
+window.switchAuthTab = function(event, mode) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('authSubmitBtn').textContent = mode === 'signin' ? 'Sign in' : 'Create account';
+  document.getElementById('authError').style.display = 'none';
+  window._authMode = mode;
+};
+
+window.handleAuthSubmit = async function() {
+  const email    = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const errEl    = document.getElementById('authError');
+  const btn      = document.getElementById('authSubmitBtn');
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; errEl.style.display = 'block'; return; }
+  if (!window._db) { errEl.textContent = 'App still loading, please try again.'; errEl.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Please wait…';
+  try {
+    if (window._authMode === 'signup') await window._db.signUp(email, password);
+    else await window._db.signIn(email, password);
+  } catch (e) {
+    errEl.textContent = e.message || 'Authentication failed.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = window._authMode === 'signin' ? 'Sign in' : 'Create account';
+  }
+};
+</script>
+
+<!-- ============================================================
      SCRIPTS — all data calls go through supabase.js
 ============================================================ -->
 <script type="module">
@@ -498,34 +533,6 @@ onAuthStateChange(async (event, session) => {
     currentProfile = null;
   }
 });
-
-window.switchAuthTab = (mode) => {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('authSubmitBtn').textContent = mode === 'signin' ? 'Sign in' : 'Create account';
-  document.getElementById('authError').style.display = 'none';
-  window._authMode = mode;
-};
-window._authMode = 'signin';
-
-window.handleAuthSubmit = async () => {
-  const email    = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const errEl    = document.getElementById('authError');
-  const btn      = document.getElementById('authSubmitBtn');
-  errEl.style.display = 'none';
-  if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; errEl.style.display = 'block'; return; }
-  btn.disabled = true; btn.textContent = 'Please wait…';
-  try {
-    if (window._authMode === 'signup') await signUp(email, password);
-    else await signIn(email, password);
-  } catch (e) {
-    errEl.textContent = e.message || 'Authentication failed.';
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = window._authMode === 'signin' ? 'Sign in' : 'Create account';
-  }
-};
 
 window.handleSignOut = async () => { await signOut(); };
 
