@@ -42,11 +42,31 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Log full response for debugging
+    console.log('Gemini response:', JSON.stringify(data));
+
+    // Check for API-level error
+    if (data.error) {
+      console.error('Gemini API error:', data.error);
+      return res.status(500).json({ error: data.error.message || 'Gemini API error' });
+    }
+
+    const candidate = data.candidates?.[0];
+    const finishReason = candidate?.finishReason;
+
+    // Handle blocked/empty responses
+    if (!candidate || finishReason === 'SAFETY' || finishReason === 'OTHER' || !candidate.content) {
+      console.error('Gemini blocked or empty response. finishReason:', finishReason);
+      return res.status(200).json({ content: [{ text: 'I was unable to generate a response for that request. Please try rephrasing.' }] });
+    }
+
+    const text = candidate.content?.parts?.[0]?.text || '';
 
     // Return in Anthropic-compatible format so the frontend needs no changes
     return res.status(200).json({ content: [{ text }] });
   } catch (e) {
+    console.error('Gemini fetch error:', e);
     return res.status(500).json({ error: 'Failed to reach Gemini API' });
   }
 }
